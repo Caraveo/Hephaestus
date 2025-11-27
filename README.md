@@ -88,8 +88,14 @@ Hephaestus uses a two-stage approach, mirroring the divine craftsman's method of
 ### Stage 1: Rapid Prototyping
 The diffusion model quickly generates candidate 3D models from your text prompt. Multiple variations are created in seconds, giving you options to choose from.
 
-### Stage 2: Masterful Refinement *(Optional)*
-Selected models can be refined using [threefiner](https://github.com/3DTopia/threefiner) for enhanced detail and quality—the final polish on a masterwork.
+### Stage 2: Masterful Refinement *(Automatic with --refine)*
+✨ **NEW:** Automatic flawless refinement is now integrated! Selected models can be automatically refined using [threefiner](https://github.com/3DTopia/threefiner) for enhanced detail and quality—the final polish on a masterwork. Simply add `--refine` to your command for flawless, production-ready models.
+
+```bash
+python -u sample_stage1.py --text "a majestic dragon" --refine --refine_iters 1000
+```
+
+See [README_THREEFINER.md](README_THREEFINER.md) for detailed refinement guide.
 
 ---
 
@@ -109,6 +115,16 @@ python -u sample_stage1.py \
   --seed 42 \
   --mcubes_res 128 \
   --render_res 128
+
+# With automatic flawless refinement (requires CUDA):
+python -u sample_stage1.py \
+  --text "a steampunk watch" \
+  --samples 1 \
+  --sampler ddim \
+  --steps 200 \
+  --refine \
+  --refine_mode if2 \
+  --refine_iters 1000
 ```
 
 **Key Parameters:**
@@ -118,6 +134,14 @@ python -u sample_stage1.py \
 - `--cfg_scale` - Guidance scale (higher = more adherence to prompt)
 - `--mcubes_res` - Resolution for mesh extraction (lower = less memory)
 - `--render_res` - Video rendering resolution
+
+**Flawless Refinement (Optional):**
+- `--refine` - Automatically refine mesh with threefiner for flawless quality
+- `--refine_mode` - Refinement mode: `if2` (best), `sd`, `if`, `if2_fixgeo` (default: `if2`)
+- `--refine_iters` - Refinement iterations (default: 1000 for high quality)
+- `--no_refine` - Explicitly disable refinement
+
+**Note:** Refinement requires CUDA (Linux/Windows with NVIDIA GPU) and [threefiner](https://github.com/3DTopia/threefiner). Install with: `pip install threefiner`
 
 ### 🌐 Web Interface (Gradio)
 

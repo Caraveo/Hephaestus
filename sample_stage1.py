@@ -22,6 +22,7 @@ from utility.initialize import instantiate_from_config, get_obj_from_str
 from utility.triplane_renderer.eg3d_renderer import sample_from_planes, generate_planes
 from utility.triplane_renderer.renderer import get_rays, to8b
 from utility.device_utils import get_device, get_dtype, empty_cache, to_device
+from utility.refinement import refine_mesh_automatic, refine_with_threefiner, check_threefiner_available, check_cuda_available
 from safetensors.torch import load_file
 from huggingface_hub import hf_hub_download
 
@@ -65,6 +66,15 @@ def main():
     parser.add_argument("--no_mcubes", action='store_true', default=False)
     parser.add_argument("--mcubes_res", type=int, default=128)
     parser.add_argument("--cfg_scale", type=float, default=1)
+    parser.add_argument("--refine", action='store_true', default=False, 
+                        help="Automatically refine mesh with threefiner after generation (requires CUDA)")
+    parser.add_argument("--refine_mode", type=str, default='if2', 
+                        choices=['if2', 'sd', 'if', 'sd_fixgeo', 'if_fixgeo', 'if2_fixgeo'],
+                        help="Threefiner refinement mode (default: if2 for best quality)")
+    parser.add_argument("--refine_iters", type=int, default=1000,
+                        help="Number of refinement iterations (default: 1000 for high quality)")
+    parser.add_argument("--no_refine", action='store_true', default=False,
+                        help="Explicitly disable refinement (overrides --refine)")
     args = parser.parse_args()
 
     if args.text is not None:
@@ -90,6 +100,11 @@ def main():
 
     log_dir = os.path.join('results', args.config.split('/')[-1].split('.')[0], args.test_folder)
     os.makedirs(log_dir, exist_ok=True)
+    
+    # Create stage2 directory for refined meshes if refinement is enabled
+    if args.refine and not args.no_refine:
+        stage2_dir = os.path.join(os.path.dirname(log_dir), 'stage2')
+        os.makedirs(stage2_dir, exist_ok=True)
 
     if args.ckpt == None:
         ckpt = hf_hub_download(repo_id="hongfz16/3DTopia", filename="model.safetensors")
@@ -303,7 +318,49 @@ def main():
 
                         # export to ply
                         mesh = trimesh.Trimesh(vertices, triangles, vertex_colors=(rgb_final * 255).astype(np.uint8))
-                        trimesh.exchange.export.export_mesh(mesh, os.path.join(log_dir, f"{text_connect}_{s}_{b}.ply"), file_type='ply')
+                        ply_path = os.path.join(log_dir, f"{text_connect}_{s}_{b}.ply")
+                        trimesh.exchange.export.export_mesh(mesh, ply_path, file_type='ply')
+                        print(f"✓ Generated mesh: {ply_path}")
+                        
+                        # Automatic refinement with threefiner if requested
+                        if args.refine and not args.no_refine:
+                            print(f"\n{'='*60}")
+                            print(f"🔨 Starting automatic refinement with threefiner...")
+                            print(f"{'='*60}")
+                            
+                            # Check if refinement is available
+                            if check_threefiner_available() and check_cuda_available():
+                                # Create stage2 directory if it doesn't exist
+                                stage2_dir = os.path.join(os.path.dirname(log_dir), 'stage2')
+                                os.makedirs(stage2_dir, exist_ok=True)
+                                
+                                refined_path = refine_with_threefiner(
+                                    mesh_path=ply_path,
+                                    prompt=text_i,
+                                    refinement_mode=args.refine_mode,
+                                    outdir=stage2_dir,
+                                    save_name=f"{text_connect}_{s}_{b}_refined",
+                                    iters=args.refine_iters,
+                                    front_dir='-y',
+                                    text_dir=True,
+                                    verbose=True
+                                )
+                                
+                                if refined_path:
+                                    print(f"\n{'='*60}")
+                                    print(f"✓ Flawless refinement complete!")
+                                    print(f"  Original: {ply_path}")
+                                    print(f"  Refined:  {refined_path}")
+                                    print(f"{'='*60}\n")
+                                else:
+                                    print(f"⚠ Refinement failed, but original mesh is available: {ply_path}")
+                            else:
+                                print("⚠ Refinement skipped:")
+                                if not check_threefiner_available():
+                                    print("  - threefiner CLI not found. Install with: pip install threefiner")
+                                if not check_cuda_available():
+                                    print("  - CUDA not available. threefiner requires CUDA (Linux/Windows with NVIDIA GPU)")
+                                print(f"  Original mesh saved: {ply_path}")
 
                     if not args.no_video:
                         view_num = len(batch_rays_list)
