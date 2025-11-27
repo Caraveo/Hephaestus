@@ -1,37 +1,252 @@
-<p align="center">
-    <picture>
-    <img alt="logo" src="assets/3dtopia.jpeg" width="20%">
-    </picture>
-</p>
-
 <div align="center">
-  <h1>Hephaestus (3DTopia)</h1>
-  <p>
-      A two-stage text-to-3D generation model. The first stage uses diffusion model to quickly generate candidates. The second stage refines the assets chosen from the first stage.
-  </p>
-  <p>
-      <strong>Now with Mac MPS (Metal Performance Shaders) support with float16 precision!</strong>
-  </p>
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=3DTopia.3DTopia" />
 
-  <p>
-       
-  </p>
+<picture>
+  <img alt="Hephaestus Logo" src="assets/3dtopia.jpeg" width="25%">
+</picture>
 
-https://github.com/3DTopia/3DTopia/assets/23376858/c9716cf0-6e61-4983-82b2-2e8f579bd46c
-    
+# 🔨 Hephaestus
+
+### *Forge 3D Models Natively on Your Mac*
+
+**Transform words into three-dimensional reality. Powered by the divine craft of Hephaestus, brought to life through Apple's Metal Performance Shaders.**
+
+[![Visitor Badge](https://visitor-badge.laobi.icu/badge?page_id=Hephaestus.Hephaestus)](https://github.com/caraveo/Hephaestus)
+
+---
+
 </div>
 
-## News
+## The Forge of Hephaestus
 
-[2024/03/10] Our captions for Objaverse is released [here](https://github.com/3DTopia/3DTopia/releases).
+In the pantheon of Greek mythology, **Hephaestus** was the master craftsman of the gods—the divine blacksmith whose forge burned deep within Mount Etna. Though cast out of Olympus for his imperfections, he transformed his exile into mastery. With hammer and anvil, he crafted not just weapons and armor, but living automatons, golden thrones, and wonders that defied imagination.
 
-[2024/03/04] Our technical report is released [here](https://arxiv.org/pdf/2403.02234.pdf).
+Hephaestus worked in fire and metal, shaping raw materials into creations of breathtaking complexity. From simple descriptions, he forged reality—each piece a testament to the power of craft and vision.
 
-[2024/01/18] We release a text-to-3D model 3DTopia!
+---
+
+## Welcome to Hephaestus
+
+**Hephaestus** brings this ancient craft to your Mac, harnessing the power of modern AI to forge 3D models from text descriptions. Built upon the foundation of [3DTopia](https://github.com/3DTopia/3DTopia), this project transforms simple prompts into fully-realized 3D objects—all running natively on your Mac using Apple's Metal Performance Shaders (MPS) with float16 precision.
+
+### What Makes Hephaestus Special?
+
+🔥 **Native Mac Performance** - Optimized for Apple Silicon with MPS acceleration  
+⚡ **Rapid Generation** - Create 3D models in minutes, not hours  
+🎨 **Two-Stage Refinement** - Quick candidates, then polished perfection  
+🧠 **Diffusion-Powered** - State-of-the-art AI model architecture  
+✨ **Float16 Precision** - Efficient memory usage without sacrificing quality  
+
+Simply describe what you want, and watch as Hephaestus transforms your words into three-dimensional reality—just as the divine smith once forged wonders from raw description and raw material.
+
+---
+
+## Quick Start
+
+### For Mac Users
+
+Hephaestus is optimized for macOS with native Metal Performance Shaders support. Getting started is simple:
+
+```bash
+# Clone the repository
+git clone https://github.com/caraveo/Hephaestus.git
+cd Hephaestus
+
+# Create and activate the environment
+conda env create -f environment_mac.yml
+conda activate hephaestus
+
+# Verify your setup (should show MPS available)
+python test_mps.py
+
+# Forge your first 3D model
+python -u sample_stage1.py --text "a majestic dragon statue" --samples 1 --sampler ddim --steps 200 --cfg_scale 7.5 --seed 0
+```
+
+Your creation will appear in `results/default/stage1/`—a mesh file ready for use in any 3D application.
+
+**📖 Detailed Mac setup instructions:** See [README_MAC.md](README_MAC.md)  
+**⚡ Quick start guide:** See [QUICKSTART_MAC.md](QUICKSTART_MAC.md)
+
+### For Linux/Windows (CUDA)
+
+```bash
+conda env create -f environment.yml
+conda activate hephaestus
+python -u sample_stage1.py --text "a robot" --samples 1 --sampler ddim --steps 200 --cfg_scale 7.5 --seed 0
+```
+
+---
+
+## The Forging Process
+
+Hephaestus uses a two-stage approach, mirroring the divine craftsman's method of rough shaping followed by meticulous refinement:
+
+### Stage 1: Rapid Prototyping
+The diffusion model quickly generates candidate 3D models from your text prompt. Multiple variations are created in seconds, giving you options to choose from.
+
+### Stage 2: Masterful Refinement *(Optional)*
+Selected models can be refined using [threefiner](https://github.com/3DTopia/threefiner) for enhanced detail and quality—the final polish on a masterwork.
+
+---
+
+## Features
+
+### 🎯 Command-Line Interface
+
+Generate models directly from the terminal with full control over all parameters:
+
+```bash
+python -u sample_stage1.py \
+  --text "a steampunk watch" \
+  --samples 4 \
+  --sampler ddim \
+  --steps 200 \
+  --cfg_scale 7.5 \
+  --seed 42 \
+  --mcubes_res 128 \
+  --render_res 128
+```
+
+**Key Parameters:**
+- `--text` - Your creative prompt describing the 3D object
+- `--samples` - Number of variations to generate (1-4)
+- `--steps` - Sampling steps (more = higher quality, slower)
+- `--cfg_scale` - Guidance scale (higher = more adherence to prompt)
+- `--mcubes_res` - Resolution for mesh extraction (lower = less memory)
+- `--render_res` - Video rendering resolution
+
+### 🌐 Web Interface (Gradio)
+
+Launch an interactive web interface for easy model generation:
+
+```bash
+python gradio_demo.py
+```
+
+Then open your browser to the provided URL. Simply enter your prompt, adjust settings, and watch Hephaestus forge your creation.
+
+### 🎨 Output Formats
+
+- **`.ply`** - Point cloud format, ready for 3D editing
+- **`.mp4`** - Multi-view rotation videos showing your model from all angles
+- **`.glb`** - After stage 2 refinement (if using threefiner)
+
+---
+
+## Requirements
+
+### Mac (Recommended)
+- macOS 12.3 or later
+- Apple Silicon (M1/M2/M3) or Intel Mac
+- Python 3.10+
+- Anaconda or Miniconda
+- At least 16GB RAM recommended
+
+### Linux/Windows
+- CUDA-capable GPU
+- Python 3.8+
+- Anaconda or Miniconda
+
+---
+
+## Installation Details
+
+### Automatic Checkpoint Download
+
+Model checkpoints are automatically downloaded on first run from [HuggingFace](https://huggingface.co/hongfz16/3DTopia). For manual download:
+
+```bash
+# Model will be saved to checkpoints/
+# Or download manually: model.safetensors from hongfz16/3DTopia
+```
+
+### Stage 2 Refinement (Optional)
+
+To enable the refinement stage, install [threefiner](https://github.com/3DTopia/threefiner) separately. Stage 1 works perfectly on its own for most use cases.
+
+---
+
+## Examples
+
+Watch as Hephaestus transforms simple descriptions into 3D reality:
+
+```
+"a majestic dragon statue"          → Ancient guardian brought to life
+"a retro computer from the 1980s"   → Nostalgic technology recreated
+"a futuristic spaceship"            → Science fiction made tangible
+"a cute robot with big eyes"        → Character design in three dimensions
+"a detailed pocket watch"           → Precision craftsmanship realized
+```
+
+Each creation is unique—just as Hephaestus never forged the same item twice.
+
+---
+
+## Performance Tips
+
+### For Mac Users
+
+- **First Run**: May be slower as Metal compiles the model (one-time cost)
+- **Memory Management**: Reduce `--mcubes_res` if you encounter memory issues
+- **Speed vs Quality**: Lower `--steps` (50-100) for faster generation, higher (200-500) for better quality
+- **Float16**: Automatically enabled on MPS—more efficient memory usage
+
+### Optimization
+
+- Start with lower resolution (`--mcubes_res 64`) to test prompts quickly
+- Use `--samples 1` to generate one model at a time
+- Disable video with `--no_video` to speed up generation
+
+---
+
+## Troubleshooting
+
+### OpenMP Error on Mac
+
+If you encounter OpenMP library conflicts, the scripts automatically handle this. If issues persist:
+
+```bash
+export KMP_DUPLICATE_LIB_OK=TRUE
+```
+
+Or use our activation script: `source activate_hephaestus.sh`
+
+### MPS Not Available
+
+Ensure you have:
+- macOS 12.3+
+- PyTorch 2.0.0+ installed
+- Apple Silicon Mac (or Intel with Metal support)
+
+Check with: `python test_mps.py`
+
+### Out of Memory
+
+Reduce resolution parameters:
+```bash
+--mcubes_res 64 --render_res 64
+```
+
+---
+
+## Architecture
+
+Hephaestus is built on the powerful [3DTopia](https://arxiv.org/pdf/2403.02234.pdf) architecture:
+
+- **Latent Diffusion Model** - Core generative engine
+- **Triplane VAE** - 3D representation learning
+- **EG3D Renderer** - High-quality neural rendering
+- **CLIP Text Encoder** - Understanding your prompts
+
+All optimized for Mac with native Metal Performance Shaders support.
+
+---
 
 ## Citation
-```
+
+If you use Hephaestus in your research or projects, please cite the original 3DTopia paper:
+
+```bibtex
 @article{hong20243dtopia,
   title={3DTopia: Large Text-to-3D Generation Model with Hybrid Diffusion Priors},
   author={Hong, Fangzhou and Tang, Jiaxiang and Cao, Ziang and Shi, Min and Wu, Tong and Chen, Zhaoxi and Wang, Tengfei and Pan, Liang and Lin, Dahua and Liu, Ziwei},
@@ -40,62 +255,40 @@ https://github.com/3DTopia/3DTopia/assets/23376858/c9716cf0-6e61-4983-82b2-2e8f5
 }
 ```
 
-## 1. Quick Start
+---
 
-### 1.1 Install Environment for this Repository
+## Acknowledgments
 
-**For Mac (Apple Silicon/Intel with MPS support):**
-We recommend using Anaconda to manage the environment.
-```bash
-conda env create -f environment_mac.yml
-conda activate hephaestus
-python test_mps.py  # Verify MPS support
-```
+Hephaestus stands on the shoulders of giants:
 
-**For Linux/Windows with CUDA:**
-```bash
-conda env create -f environment.yml
-```
+- **[3DTopia](https://github.com/3DTopia/3DTopia)** - The foundation that makes it all possible
+- **[EG3D](https://github.com/NVlabs/eg3d)** - Neural rendering architecture
+- **[Stable Diffusion](https://github.com/CompVis/stable-diffusion)** - Diffusion model framework
+- **[Objaverse](https://objaverse.allenai.org)** - Training dataset
+- **The open-source community** - Making AI accessible to all
 
-**Note:** For detailed Mac setup instructions, see [README_MAC.md](README_MAC.md).
+Like Hephaestus drawing inspiration from the fires of the earth, this project draws from the collective wisdom of researchers and developers worldwide.
 
-### 1.2 Install Second Stage Refiner
-Please refer to [threefiner](https://github.com/3DTopia/threefiner) to install our second stage mesh refiner. We have tested installing both environments together with Pytorch 1.12.0 and CUDA 11.3.
+---
 
-### 1.3 Download Checkpoints \[Optional\]
-We have implemented automatic checkpoint download for both `gradio_demo.py` and `sample_stage1.py`. If you prefer to download manually, you may download checkpoint `3dtopia_diffusion_state_dict.ckpt` or `model.safetensors` from [huggingface](https://huggingface.co/hongfz16/3DTopia).
+## License
 
-### Q&A
-- If you encounter this error in the second stage `ImportError: /lib64/libc.so.6: version 'GLIBC_2.25' not found`, try to install a lower version of pymeshlab by `pip install pymeshlab==0.2`.
+This project maintains the same license as 3DTopia. See [LICENSE](LICENSE) for details.
 
-## 2. Inference
+---
 
-### 2.1 First Stage
-Run the following command to sample `a robot` as the first stage. Results will be located under the folder `results`.
-```bash
-python -u sample_stage1.py --text "a robot" --samples 1 --sampler ddim --steps 200 --cfg_scale 7.5 --seed 0
-```
+## The Forge Awaits
 
-Arguments:
-- `--ckpt` specifies checkpoint file path;
-- `--test_folder` controls which subfolder to put all the results;
-- `--seed` will fix random seeds; `--sampler` can be set to `ddim` for DDIM sampling (By default, we use 1000 steps DDPM sampling);
-- `--steps` controls sampling steps only for DDIM;
-- `--samples` controls number of samples;
-- `--text` is the input text;
-- `--no_video` and `--no_mcubes` suppress rendering multi-view videos and marching cubes, which are by-default enabled;
-- `--mcubes_res` controls the resolution of the 3D volumn sampled for marching cubes; One can lower this resolution to save graphics memory;
-- `--render_res` controls the resolution of the rendered video;
+Just as Hephaestus once transformed raw materials into divine creations, you can now transform words into three-dimensional reality. The forge is ready. The tools are prepared. What will you create?
 
-### 2.2 Second Stage
-There are two steps as the second stage refinement. Here is a simple example. Please refer to [threefiner](https://github.com/3DTopia/threefiner) for more detailed usage.
-```bash
-# step 1
-threefiner sd --mesh results/default/stage1/a_robot_0_0.ply --prompt "a robot" --text_dir --front_dir='-y' --outdir results/default/stage2/ --save a_robot_0_0_sd.glb
-# step 2
-threefiner if2 --mesh results/default/stage2/a_robot_0_0_sd.glb --prompt "a robot" --outdir results/default/stage2/ --save a_robot_0_0_if2.glb
-```
-The resulting mesh can be found at `results/default/stage2/a_robot_0_0_if2.glb`
+**Begin your journey:** Start with `python test_mps.py` to verify your setup, then forge your first model and discover what's possible when ancient craft meets modern AI.
 
-## 3. Acknowledgement
-We thank the community for building and open-sourcing the foundation of this work. Specifically, we want to thank [EG3D](https://github.com/NVlabs/eg3d), [Stable Diffusion](https://github.com/CompVis/stable-diffusion) for their codes. We also want to thank [Objaverse](https://objaverse.allenai.org) for the wonderful dataset.
+---
+
+<div align="center">
+
+*"From chaos and fire, beauty emerges. From words and vision, reality takes form."*
+
+**— The Way of Hephaestus**
+
+</div>
