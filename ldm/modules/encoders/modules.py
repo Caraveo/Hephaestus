@@ -189,7 +189,7 @@ if packaging.version.parse(torch.__version__) < packaging.version.parse("1.7.1")
 __all__ = ["available_models", "load", "tokenize"]
 _tokenizer = _Tokenizer()
 
-def tokenize_with_truncation(texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False) -> torch.LongTensor:
+def tokenize_with_truncation(texts: Union[str, List[str]], context_length: int = 77, truncate: bool = False, device=None) -> torch.LongTensor:
     """
     Returns the tokenized representation of given input string(s)
 
@@ -203,6 +203,9 @@ def tokenize_with_truncation(texts: Union[str, List[str]], context_length: int =
 
     truncate: bool
         Whether to truncate the text in case its encoding is longer than the context length
+    
+    device: torch.device or str, optional
+        Device to create the tensor on. If None, creates on CPU.
 
     Returns
     -------
@@ -214,7 +217,20 @@ def tokenize_with_truncation(texts: Union[str, List[str]], context_length: int =
     sot_token = _tokenizer.encoder["<|startoftext|>"]
     eot_token = _tokenizer.encoder["<|endoftext|>"]
     all_tokens = [[sot_token] + _tokenizer.encode(text) + [eot_token] for text in texts]
-    result = torch.zeros(len(all_tokens), context_length, dtype=torch.long)
+    
+    # Create tensor directly on target device to avoid CUDA lazy init
+    if device is not None:
+        if isinstance(device, str):
+            # Handle device string safely
+            if device.lower() == "cuda" and not torch.cuda.is_available():
+                device = "cpu"
+            elif device.lower() == "mps":
+                device = torch.device("mps") if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available() else torch.device("cpu")
+            else:
+                device = torch.device(device)
+        result = torch.zeros(len(all_tokens), context_length, dtype=torch.long, device=device)
+    else:
+        result = torch.zeros(len(all_tokens), context_length, dtype=torch.long)
 
     for i, tokens in enumerate(all_tokens):
         if len(tokens) > context_length:
@@ -223,7 +239,7 @@ def tokenize_with_truncation(texts: Union[str, List[str]], context_length: int =
                 tokens[-1] = eot_token
             else:
                 raise RuntimeError(f"Input {texts[i]} is too long for context length {context_length}")
-        result[i, :len(tokens)] = torch.tensor(tokens)
+        result[i, :len(tokens)] = torch.tensor(tokens, device=result.device)
 
     return result
 
@@ -246,25 +262,8 @@ class FrozenCLIPTextEmbedder(nn.Module):
 
     def forward(self, text):
         # tokens = clip.tokenize(text).to(self.device)
-        tokens = tokenize_with_truncation(text, truncate=True)
-        # Convert device string to torch.device if needed, and move tensor safely
-        # Avoid CUDA lazy init by checking device type first
-        if isinstance(self.device, str):
-            device_str = self.device.lower()
-            if device_str == "mps":
-                device_obj = torch.device("mps")
-            elif device_str == "cuda":
-                # Only allow CUDA if actually available to avoid lazy init error
-                if torch.cuda.is_available():
-                    device_obj = torch.device("cuda")
-                else:
-                    device_obj = torch.device("cpu")
-            else:
-                device_obj = torch.device(self.device)
-        else:
-            device_obj = self.device
-        
-        tokens = tokens.to(device_obj)
+        # Create tokens directly on target device to avoid CUDA lazy init
+        tokens = tokenize_with_truncation(text, truncate=True, device=self.device)
         z = self.model.encode_text(tokens)
         if self.normalize:
             z = z / torch.linalg.norm(z, dim=1, keepdim=True)
