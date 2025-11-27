@@ -106,7 +106,8 @@ def main():
         raise NotImplementedError
     
     device = get_device(prefer_mps=True)
-    dtype = get_dtype(device)
+    # Use float32 for MPS (MPS supports float32, and mixing float16/float32 causes errors)
+    dtype = torch.float32
     print(f"Using device: {device}, dtype: {dtype}")
     
     model = to_device(model, device, dtype)
@@ -119,10 +120,8 @@ def main():
         # Ensure cond_stage_model is on the correct device
         model.cond_stage_model = to_device(model.cond_stage_model, device)
     
-    # For MPS, convert model to float16
-    if device.type == "mps":
-        model = model.half()
-        print("Model converted to float16 for MPS")
+    # Keep model in float32 for MPS compatibility (avoids dtype mixing errors)
+    print("Model using float32 for MPS compatibility")
 
     class DummySampler:
         def __init__(self, model):
@@ -248,7 +247,8 @@ def main():
                         min_bound = np.array([-1.2, -1.2, -1.2])
                         max_bound = np.array([1.2, 1.2, 1.2])
                         vertices = vertices / (res - 1) * (max_bound - min_bound)[None, :] + min_bound[None, :]
-                        pt_vertices = torch.from_numpy(vertices).to(device)
+                        # Convert to float32 before moving to MPS (MPS doesn't support float64)
+                        pt_vertices = torch.from_numpy(vertices.astype(np.float32)).to(device)
 
                         # extract vertices color
                         res_triplane = 256
