@@ -89,13 +89,22 @@ Hephaestus uses a two-stage approach, mirroring the divine craftsman's method of
 The diffusion model quickly generates candidate 3D models from your text prompt. Multiple variations are created in seconds, giving you options to choose from.
 
 ### Stage 2: Masterful Refinement *(Automatic with --refine)*
-✨ **NEW:** Automatic flawless refinement is now integrated! Selected models can be automatically refined using [threefiner](https://github.com/3DTopia/threefiner) for enhanced detail and quality—the final polish on a masterwork. Simply add `--refine` to your command for flawless, production-ready models.
+✨ **NEW:** Automatic flawless refinement is now integrated! Works on **both Mac MPS and CUDA**:
+
+- **Mac MPS**: Native refinement using iterative diffusion with higher quality settings
+- **CUDA**: Uses [threefiner](https://github.com/3DTopia/threefiner) for advanced texture refinement
+
+Simply add `--refine` to your command for flawless, production-ready models:
 
 ```bash
+# Mac MPS (automatic native refinement)
 python -u sample_stage1.py --text "a majestic dragon" --refine --refine_iters 1000
+
+# CUDA (threefiner refinement)
+python -u sample_stage1.py --text "a majestic dragon" --refine --refine_mode if2 --refine_iters 1000
 ```
 
-See [README_THREEFINER.md](README_THREEFINER.md) for detailed refinement guide.
+The system automatically selects the best refinement method for your platform!
 
 ---
 
@@ -141,7 +150,9 @@ python -u sample_stage1.py \
 - `--refine_iters` - Refinement iterations (default: 1000 for high quality)
 - `--no_refine` - Explicitly disable refinement
 
-**Note:** Refinement requires CUDA (Linux/Windows with NVIDIA GPU) and [threefiner](https://github.com/3DTopia/threefiner). Install with: `pip install threefiner`
+**Note:** 
+- **Mac MPS**: Refinement works natively! No additional setup needed.
+- **CUDA**: Requires [threefiner](https://github.com/3DTopia/threefiner). Install with: `pip install threefiner`
 
 ### 🌐 Web Interface (Gradio)
 
