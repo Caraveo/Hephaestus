@@ -68,7 +68,7 @@ def main():
     parser.add_argument("--mcubes_res", type=int, default=128)
     parser.add_argument("--cfg_scale", type=float, default=1)
     parser.add_argument("--refine", action='store_true', default=False, 
-                        help="Automatically refine mesh with threefiner after generation (requires CUDA)")
+                        help="Automatically refine mesh after generation (uses threefiner on CUDA, native MPS refinement on Mac)")
     parser.add_argument("--refine_mode", type=str, default='if2', 
                         choices=['if2', 'sd', 'if', 'sd_fixgeo', 'if_fixgeo', 'if2_fixgeo'],
                         help="Threefiner refinement mode (default: if2 for best quality)")
