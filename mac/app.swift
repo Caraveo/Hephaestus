@@ -16,6 +16,16 @@ struct HephaestusApp: App {
         }
         .windowStyle(.hiddenTitleBar)
         .windowToolbarStyle(.unified)
+        .commands {
+            // App menu customization
+        }
+    }
+    
+    init() {
+        // Set app icon if possible
+        if let iconPath = Bundle.main.path(forResource: "Hephaestus", ofType: "png") {
+            // Icon will be set via Assets.xcassets in Xcode project
+        }
     }
 }
 
@@ -65,23 +75,49 @@ struct ContentView: View {
 // MARK: - Header
 
 struct HeaderView: View {
+    @State private var logoImage: NSImage? = nil
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "hammer.fill")
-                    .font(.system(size: 32))
-                    .foregroundColor(.orange)
+            HStack(spacing: 16) {
+                // Hephaestus Logo
+                Group {
+                    if let image = logoImage {
+                        Image(nsImage: image)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                    } else {
+                        Image(systemName: "hammer.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.orange)
+                    }
+                }
+                .frame(width: 64, height: 64)
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .onAppear {
+                    loadLogo()
+                }
                 
-                Text("Hephaestus")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(.primary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Hephaestus")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.primary)
+                    
+                    Text("Forge 3D Models from Text")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
             }
-            
-            Text("Forge 3D Models from Text")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
         }
         .padding(.bottom, 8)
+    }
+    
+    private func loadLogo() {
+        let logoPath = "/Users/caraveo/Hephaestus/Hephaestus.png"
+        if let image = NSImage(contentsOfFile: logoPath) {
+            logoImage = image
+        }
     }
 }
 
