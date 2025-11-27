@@ -148,18 +148,16 @@ def main():
                 conditioning, batch_size, shape=[batch_size, ] + shape, *args, **kwargs
             ), None
 
-    if args.sampler == 'dpm':
-        raise NotImplementedError
-        # sampler = DPMSolverSampler(model)
+    if args.sampler == 'dpm' or args.sampler == 'dpm_solver':
+        sampler = DPMSolverSampler(model)
     elif args.sampler == 'plms':
-        raise NotImplementedError
-        # sampler = PLMSSampler(model)
+        sampler = PLMSSampler(model)
     elif args.sampler == 'ddim':
         sampler = DDIMSampler(model)
     elif args.sampler == 'ddpm':
         sampler = DummySampler(model)
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f"Unknown sampler: {args.sampler}")
 
     img_size = configs.model.params.unet_config.params.image_size
     channels = configs.model.params.unet_config.params.in_channels
@@ -206,7 +204,7 @@ def main():
                 c = model.get_learned_conditioning([text_i])
                 unconditional_c = torch.zeros_like(c)
                 if args.cfg_scale != 1:
-                    assert args.sampler == 'ddim'
+                    # All samplers support CFG scale
                     sample, _ = sampler.sample(
                         S=args.steps,
                         batch_size=batch_size,
