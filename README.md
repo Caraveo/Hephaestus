@@ -11,7 +11,9 @@
 **Transform words into three-dimensional reality. Powered by the divine craft of Hephaestus, brought to life through Apple's Metal Performance Shaders.**
 
 ![Status](https://img.shields.io/badge/status-active-success)
-![Build](https://img.shields.io/badge/build-not_building-lightgrey)
+![Build](https://img.shields.io/badge/build-OK-success)
+![CLI](https://img.shields.io/badge/CLI-OK-success)
+![UI](https://img.shields.io/badge/UI-OK-success)
 ![macOS](https://img.shields.io/badge/macOS-12.3%2B-blue)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 [![Visitor Badge](https://visitor-badge.laobi.icu/badge?page_id=Hephaestus.Hephaestus)](https://github.com/caraveo/Hephaestus)
