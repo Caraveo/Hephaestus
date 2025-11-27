@@ -43,33 +43,34 @@ def shift_schedule(base_betas, shift_scale):
     return shifted_betas
 
 def make_beta_schedule(schedule, n_timestep, linear_start=1e-4, linear_end=2e-2, cosine_s=8e-3, shift_scale=None):
+    # Use float32 instead of float64 for MPS compatibility (MPS doesn't support float64)
     if schedule == "linear":
         betas = (
-                torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float64) ** 2
+                torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float32) ** 2
         )
 
     elif schedule == "cosine":
         timesteps = (
-                torch.arange(n_timestep + 1, dtype=torch.float64) / n_timestep + cosine_s
+                torch.arange(n_timestep + 1, dtype=torch.float32) / n_timestep + cosine_s
         )
         alphas = timesteps / (1 + cosine_s) * np.pi / 2
         alphas = torch.cos(alphas).pow(2)
         alphas = alphas / alphas[0]
         betas = 1 - alphas[1:] / alphas[:-1]
-        betas = np.clip(betas, a_min=0, a_max=0.999)
+        betas = np.clip(betas, a_min=0, a_max=0.999).astype(np.float32)
 
     elif schedule == "sqrt_linear":
-        betas = torch.linspace(linear_start, linear_end, n_timestep, dtype=torch.float64)
+        betas = torch.linspace(linear_start, linear_end, n_timestep, dtype=torch.float32)
     elif schedule == "sqrt":
-        betas = torch.linspace(linear_start, linear_end, n_timestep, dtype=torch.float64) ** 0.5
+        betas = torch.linspace(linear_start, linear_end, n_timestep, dtype=torch.float32) ** 0.5
     elif schedule == 'linear_force_zero_snr':
         betas = (
-                torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float64) ** 2
+                torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float32) ** 2
         )
         betas = force_zero_snr(betas)
     elif schedule == 'linear_100':
         betas = (
-            torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float64) ** 2
+            torch.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=torch.float32) ** 2
         )
         betas = betas[:100]
     else:
@@ -78,7 +79,7 @@ def make_beta_schedule(schedule, n_timestep, linear_start=1e-4, linear_end=2e-2,
     if shift_scale is not None:
         betas = shift_schedule(betas, shift_scale)
 
-    return betas.numpy()
+    return betas.numpy().astype(np.float32)
 
 
 def make_ddim_timesteps(ddim_discr_method, num_ddim_timesteps, num_ddpm_timesteps, verbose=True):
@@ -99,12 +100,18 @@ def make_ddim_timesteps(ddim_discr_method, num_ddim_timesteps, num_ddpm_timestep
 
 
 def make_ddim_sampling_parameters(alphacums, ddim_timesteps, eta, verbose=True):
+    # Ensure float32 for MPS compatibility
+    if isinstance(alphacums, np.ndarray):
+        alphacums = alphacums.astype(np.float32)
+    else:
+        alphacums = np.array(alphacums, dtype=np.float32)
+    
     # select alphas for computing the variance schedule
-    alphas = alphacums[ddim_timesteps]
-    alphas_prev = np.asarray([alphacums[0]] + alphacums[ddim_timesteps[:-1]].tolist())
+    alphas = alphacums[ddim_timesteps].astype(np.float32)
+    alphas_prev = np.asarray([alphacums[0]] + alphacums[ddim_timesteps[:-1]].tolist(), dtype=np.float32)
 
     # according the the formula provided in https://arxiv.org/abs/2010.02502
-    sigmas = eta * np.sqrt((1 - alphas_prev) / (1 - alphas) * (1 - alphas / alphas_prev))
+    sigmas = eta * np.sqrt((1 - alphas_prev) / (1 - alphas) * (1 - alphas / alphas_prev)).astype(np.float32)
     if verbose:
         print(f'Selected alphas for ddim sampler: a_t: {alphas}; a_(t-1): {alphas_prev}')
         print(f'For the chosen value of eta, which is {eta}, '

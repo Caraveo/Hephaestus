@@ -30,8 +30,27 @@ class DDIMSampler(object):
         alphas_cumprod = self.model.alphas_cumprod
         assert alphas_cumprod.shape[0] == self.ddpm_num_timesteps, 'alphas have to be defined for each timestep'
         device = next(self.model.parameters()).device
-        # Use float32 for MPS compatibility (MPS doesn't support float64)
-        to_torch = lambda x: x.clone().detach().to(torch.float32).to(device)
+        # Determine dtype based on device - use float16 for MPS if model is float16, otherwise float32
+        model_param = next(self.model.parameters())
+        if device.type == "mps" and model_param.dtype == torch.float16:
+            target_dtype = torch.float16
+        else:
+            target_dtype = torch.float32
+        
+        # Helper to convert numpy arrays or tensors to proper dtype and device
+        def to_torch(x):
+            if isinstance(x, np.ndarray):
+                # Convert numpy array to tensor with proper dtype
+                tensor = torch.from_numpy(x.astype(np.float32))
+            elif isinstance(x, torch.Tensor):
+                tensor = x.clone().detach()
+            else:
+                tensor = torch.tensor(x, dtype=torch.float32)
+            
+            # Convert to target dtype and move to device
+            if tensor.dtype != target_dtype:
+                tensor = tensor.to(target_dtype)
+            return tensor.to(device)
 
         self.register_buffer('betas', to_torch(self.model.betas))
         self.register_buffer('alphas_cumprod', to_torch(alphas_cumprod))
@@ -40,21 +59,24 @@ class DDIMSampler(object):
         # calculations for diffusion q(x_t | x_{t-1}) and others
         # Ensure all numpy operations use float32 for MPS compatibility
         alphas_cumprod_cpu = alphas_cumprod.cpu().float()
-        self.register_buffer('sqrt_alphas_cumprod', to_torch(np.sqrt(alphas_cumprod_cpu.numpy(), dtype=np.float32)))
-        self.register_buffer('sqrt_one_minus_alphas_cumprod', to_torch(np.sqrt(1. - alphas_cumprod_cpu.numpy(), dtype=np.float32)))
-        self.register_buffer('log_one_minus_alphas_cumprod', to_torch(np.log(1. - alphas_cumprod_cpu.numpy(), dtype=np.float32)))
-        self.register_buffer('sqrt_recip_alphas_cumprod', to_torch(np.sqrt(1. / alphas_cumprod_cpu.numpy(), dtype=np.float32)))
-        self.register_buffer('sqrt_recipm1_alphas_cumprod', to_torch(np.sqrt(1. / alphas_cumprod_cpu.numpy() - 1, dtype=np.float32)))
+        alphas_np = alphas_cumprod_cpu.numpy().astype(np.float32)
+        self.register_buffer('sqrt_alphas_cumprod', to_torch(np.sqrt(alphas_np)))
+        self.register_buffer('sqrt_one_minus_alphas_cumprod', to_torch(np.sqrt(1. - alphas_np)))
+        self.register_buffer('log_one_minus_alphas_cumprod', to_torch(np.log(1. - alphas_np)))
+        self.register_buffer('sqrt_recip_alphas_cumprod', to_torch(np.sqrt(1. / alphas_np)))
+        self.register_buffer('sqrt_recipm1_alphas_cumprod', to_torch(np.sqrt(1. / alphas_np - 1)))
 
         # ddim sampling parameters
         # Use float32 numpy arrays for MPS compatibility
-        ddim_sigmas, ddim_alphas, ddim_alphas_prev = make_ddim_sampling_parameters(alphacums=alphas_cumprod.cpu().float().numpy(),
+        alphacums_np = alphas_cumprod.cpu().float().numpy().astype(np.float32)
+        ddim_sigmas, ddim_alphas, ddim_alphas_prev = make_ddim_sampling_parameters(alphacums=alphacums_np,
                                                                                    ddim_timesteps=self.ddim_timesteps,
                                                                                    eta=ddim_eta,verbose=verbose)
         self.register_buffer('ddim_sigmas', to_torch(ddim_sigmas))
         self.register_buffer('ddim_alphas', to_torch(ddim_alphas))
         self.register_buffer('ddim_alphas_prev', to_torch(ddim_alphas_prev))
-        self.register_buffer('ddim_sqrt_one_minus_alphas', to_torch(np.sqrt(1. - ddim_alphas, dtype=np.float32)))
+        ddim_alphas_np = ddim_alphas.astype(np.float32) if isinstance(ddim_alphas, np.ndarray) else ddim_alphas.numpy().astype(np.float32)
+        self.register_buffer('ddim_sqrt_one_minus_alphas', to_torch(np.sqrt(1. - ddim_alphas_np)))
         sigmas_for_original_sampling_steps = ddim_eta * torch.sqrt(
             (1 - self.alphas_cumprod_prev) / (1 - self.alphas_cumprod) * (
                         1 - self.alphas_cumprod / self.alphas_cumprod_prev))
