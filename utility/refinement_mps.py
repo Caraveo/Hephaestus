@@ -73,26 +73,25 @@ def refine_mesh_mps(
         if hasattr(model, 'cond_stage_model') and model.cond_stage_model is not None:
             with torch.no_grad():
                 cond = model.get_learned_conditioning([prompt])
-                uncond = model.get_learned_conditioning([""])
+                unconditional_c = torch.zeros_like(cond)
         else:
             raise ValueError("Model does not have a condition stage model")
-        
-        # Prepare conditioning for CFG
-        cond_dict = {"c_crossattn": [torch.cat([uncond, cond])]}
         
         # Sample with higher quality settings
         if verbose:
             print(f"Generating refined latent with {refinement_steps} steps...")
         
         shape = [8, 32, 96]  # Latent shape
+        batch_size = 1
         samples, _ = sampler_obj.sample(
             S=refinement_steps,
-            conditioning=cond_dict,
-            batch_size=1,
+            batch_size=batch_size,
             shape=shape,
             verbose=False,
+            x_T=None,
+            conditioning=cond.repeat(batch_size, 1, 1),
             unconditional_guidance_scale=cfg_scale,
-            unconditional_conditioning={"c_crossattn": [uncond]},
+            unconditional_conditioning=unconditional_c.repeat(batch_size, 1, 1),
             eta=0.0
         )
         
