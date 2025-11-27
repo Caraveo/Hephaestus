@@ -14,9 +14,7 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "Hephaestus",
-            path: ".",
-            sources: ["app.swift"]
+            name: "Hephaestus"
         )
     ]
 )
