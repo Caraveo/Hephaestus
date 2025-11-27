@@ -7,7 +7,10 @@ https://github.com/CompVis/taming-transformers
 """
 
 import os
-import wandb
+try:
+    import wandb
+except ImportError:
+    wandb = None  # wandb is optional, only needed for training logging
 import torch
 import imageio
 import torch.nn as nn
@@ -1466,11 +1469,12 @@ class LatentDiffusion(DDPM):
                     for i, bci in enumerate(break_caption):
                         cv2.putText(rgb_all, bci, (50, 50*(i+1)), font, fontScale, color, thickness, cv2.LINE_AA)
 
-            self.logger.experiment.log({
-                "val/vis": [wandb.Image(rgb_all)],
-                "val/colorize_rse": [wandb.Image(colorize_res)],
-                "val/colorize_x": [wandb.Image(colorize_x)],
-            })
+            if wandb is not None and hasattr(self.logger, 'experiment'):
+                self.logger.experiment.log({
+                    "val/vis": [wandb.Image(rgb_all)],
+                    "val/colorize_rse": [wandb.Image(colorize_res)],
+                    "val/colorize_x": [wandb.Image(colorize_x)],
+                })
 
     @torch.no_grad()
     def test_schedule(self, x_start, freq=50):

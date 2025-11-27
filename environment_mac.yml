@@ -41,4 +41,5 @@ dependencies:
       - sentencepiece
       - tokenizers
       - timm
+      - wandb
 
