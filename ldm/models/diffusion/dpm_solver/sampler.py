@@ -9,13 +9,16 @@ class DPMSolverSampler(object):
     def __init__(self, model, **kwargs):
         super().__init__()
         self.model = model
-        to_torch = lambda x: x.clone().detach().to(torch.float32).to(model.device)
+        device = next(model.parameters()).device
+        to_torch = lambda x: x.clone().detach().to(torch.float32).to(device)
         self.register_buffer('alphas_cumprod', to_torch(model.alphas_cumprod))
 
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
-            if attr.device != torch.device("cuda"):
-                attr = attr.to(torch.device("cuda"))
+            # Move to the same device as the model
+            model_device = next(self.model.parameters()).device
+            if attr.device != model_device:
+                attr = attr.to(model_device)
         setattr(self, name, attr)
 
     @torch.no_grad()

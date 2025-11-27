@@ -5,9 +5,12 @@
 </p>
 
 <div align="center">
-  <h1>3DTopia</h1>
+  <h1>Hephaestus (3DTopia)</h1>
   <p>
       A two-stage text-to-3D generation model. The first stage uses diffusion model to quickly generate candidates. The second stage refines the assets chosen from the first stage.
+  </p>
+  <p>
+      <strong>Now with Mac MPS (Metal Performance Shaders) support with float16 precision!</strong>
   </p>
   <img src="https://visitor-badge.laobi.icu/badge?page_id=3DTopia.3DTopia" />
 
@@ -40,10 +43,21 @@ https://github.com/3DTopia/3DTopia/assets/23376858/c9716cf0-6e61-4983-82b2-2e8f5
 ## 1. Quick Start
 
 ### 1.1 Install Environment for this Repository
+
+**For Mac (Apple Silicon/Intel with MPS support):**
 We recommend using Anaconda to manage the environment.
+```bash
+conda env create -f environment_mac.yml
+conda activate hephaestus
+python test_mps.py  # Verify MPS support
+```
+
+**For Linux/Windows with CUDA:**
 ```bash
 conda env create -f environment.yml
 ```
+
+**Note:** For detailed Mac setup instructions, see [README_MAC.md](README_MAC.md).
 
 ### 1.2 Install Second Stage Refiner
 Please refer to [threefiner](https://github.com/3DTopia/threefiner) to install our second stage mesh refiner. We have tested installing both environments together with Pytorch 1.12.0 and CUDA 11.3.

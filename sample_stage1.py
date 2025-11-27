@@ -18,6 +18,7 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 from utility.initialize import instantiate_from_config, get_obj_from_str
 from utility.triplane_renderer.eg3d_renderer import sample_from_planes, generate_planes
 from utility.triplane_renderer.renderer import get_rays, to8b
+from utility.device_utils import get_device, get_dtype, empty_cache, to_device
 from safetensors.torch import load_file
 from huggingface_hub import hf_hub_download
 
@@ -100,8 +101,17 @@ def main():
         model.load_state_dict(model_ckpt)
     else:
         raise NotImplementedError
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    model = model.to(device)
+    
+    device = get_device(prefer_mps=True)
+    dtype = get_dtype(device)
+    print(f"Using device: {device}, dtype: {dtype}")
+    
+    model = to_device(model, device, dtype)
+    
+    # For MPS, convert model to float16
+    if device.type == "mps":
+        model = model.half()
+        print("Model converted to float16 for MPS")
 
     class DummySampler:
         def __init__(self, model):

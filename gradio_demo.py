@@ -26,9 +26,21 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 from utility.initialize import instantiate_from_config, get_obj_from_str
 from utility.triplane_renderer.eg3d_renderer import sample_from_planes, generate_planes
 from utility.triplane_renderer.renderer import get_rays, to8b
+from utility.device_utils import get_device, get_dtype, empty_cache, to_device
 
-from threefiner.gui import GUI
-from threefiner.opt import config_defaults, config_doc, check_options, Options
+# Optional import for stage 2 refinement
+try:
+    from threefiner.gui import GUI
+    from threefiner.opt import config_defaults, config_doc, check_options, Options
+    THREEFINER_AVAILABLE = True
+except ImportError:
+    THREEFINER_AVAILABLE = False
+    print("Warning: threefiner not available. Stage 2 refinement will be disabled.")
+    # Create dummy classes for type checking
+    class GUI:
+        pass
+    class Options:
+        pass
 
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -52,8 +64,18 @@ elif ckpt.endswith(".safetensors"):
     model.load_state_dict(model_ckpt)
 else:
     raise NotImplementedError
-device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-model = model.to(device)
+
+device = get_device(prefer_mps=True)
+dtype = get_dtype(device)
+print(f"Using device: {device}, dtype: {dtype}")
+
+model = to_device(model, device, dtype)
+
+# For MPS, convert model to float16
+if device.type == "mps":
+    model = model.half()
+    print("Model converted to float16 for MPS")
+
 sampler = DDIMSampler(model)
 
 img_size = configs.model.params.unet_config.params.image_size
@@ -95,20 +117,24 @@ batch_rays_list = torch.stack(batch_rays_list, 0)
 GRADIO_SAVE_PATH_MESH = 'gradio_output.glb'
 GRADIO_SAVE_PATH_VIDEO = 'gradio_output.mp4'
 
-# opt = tyro.cli(tyro.extras.subcommand_type_from_defaults(config_defaults, config_doc))
-opt = Options(
-    mode='IF2',
-    iters=400,
-)
-
-# hacks for not loading mesh at initialization
-# opt.mesh = 'tmp/_2024-01-25_19:33:03.110191_if2.glb'
-opt.save = GRADIO_SAVE_PATH_MESH
-opt.prompt = ''
-opt.text_dir = True
-opt.front_dir = '+z'
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-gui = GUI(opt)
+if THREEFINER_AVAILABLE:
+    # opt = tyro.cli(tyro.extras.subcommand_type_from_defaults(config_defaults, config_doc))
+    opt = Options(
+        mode='IF2',
+        iters=400,
+    )
+    
+    # hacks for not loading mesh at initialization
+    # opt.mesh = 'tmp/_2024-01-25_19:33:03.110191_if2.glb'
+    opt.save = GRADIO_SAVE_PATH_MESH
+    opt.prompt = ''
+    opt.text_dir = True
+    opt.front_dir = '+z'
+    # device already set above
+    gui = GUI(opt)
+else:
+    gui = None
+    opt = None
 ###################################### INIT STAGE 2 #########################################
 
 def add_text(rgb, caption):
@@ -213,7 +239,7 @@ def marching_cube(b, text, global_info):
     trimesh.exchange.export.export_mesh(mesh, path, file_type='ply')
 
     del vertices, triangles, rgb_final
-    torch.cuda.empty_cache()
+    empty_cache(device)
 
     return path
 
@@ -311,11 +337,14 @@ def infer_stage2(prompt, selection, seed, global_info, iters):
     # torch.cuda.empty_cache()
 
     process_stage2(mesh_path, prompt, "down", iters, f'tmp/{mesh_name}_if2.glb', video_path)
-    torch.cuda.empty_cache()
+    empty_cache(device)
 
     return video_path, f'tmp/{mesh_name}_if2.glb'
 
 def process_stage2(input_model, input_text, input_dir, iters, output_model, output_video):
+    if not THREEFINER_AVAILABLE:
+        raise RuntimeError("Stage 2 refinement requires threefiner. Please install it separately.")
+    
     # set front facing direction (map from gradio model3D's mysterious coordinate system to OpenGL...)
     opt.text_dir = True
     if input_dir == 'front':

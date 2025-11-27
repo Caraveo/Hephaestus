@@ -1,0 +1,43 @@
+name: hephaestus
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy>=1.24.0
+  - pillow>=9.5.0
+  - pyyaml>=6.0
+  - tqdm
+  - scipy
+  - pip:
+      - torch>=2.0.0
+      - torchvision>=0.15.0
+      - torchaudio>=2.0.0
+      - transformers
+      - diffusers
+      - einops==0.6.1
+      - omegaconf==2.3.0
+      - pytorch-lightning==2.0.2
+      - safetensors
+      - huggingface-hub
+      - open-clip-torch==2.20.0
+      - git+https://github.com/openai/CLIP.git
+      - imageio>=2.31.0
+      - imageio-ffmpeg>=0.4.8
+      - opencv-python-headless>=4.7.0
+      - trimesh>=4.0.2
+      - pymcubes>=0.1.4
+      - lpips>=0.1.4
+      - kornia>=0.6.0
+      - matplotlib>=3.7.0
+      - matplotlib-inline
+      - gradio>=3.50.0
+      - accelerate
+      - regex
+      - ftfy
+      - sentencepiece
+      - tokenizers
+      - timm
+
