@@ -111,6 +111,14 @@ def main():
     
     model = to_device(model, device, dtype)
     
+    # Update cond_stage_model device to match main model device
+    if hasattr(model, 'cond_stage_model') and model.cond_stage_model is not None:
+        if hasattr(model.cond_stage_model, 'device'):
+            # Update device attribute to torch.device object
+            model.cond_stage_model.device = device
+        # Ensure cond_stage_model is on the correct device
+        model.cond_stage_model = to_device(model.cond_stage_model, device)
+    
     # For MPS, convert model to float16
     if device.type == "mps":
         model = model.half()

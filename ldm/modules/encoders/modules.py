@@ -246,7 +246,25 @@ class FrozenCLIPTextEmbedder(nn.Module):
 
     def forward(self, text):
         # tokens = clip.tokenize(text).to(self.device)
-        tokens = tokenize_with_truncation(text, truncate=True).to(self.device)
+        tokens = tokenize_with_truncation(text, truncate=True)
+        # Convert device string to torch.device if needed, and move tensor safely
+        # Avoid CUDA lazy init by checking device type first
+        if isinstance(self.device, str):
+            device_str = self.device.lower()
+            if device_str == "mps":
+                device_obj = torch.device("mps")
+            elif device_str == "cuda":
+                # Only allow CUDA if actually available to avoid lazy init error
+                if torch.cuda.is_available():
+                    device_obj = torch.device("cuda")
+                else:
+                    device_obj = torch.device("cpu")
+            else:
+                device_obj = torch.device(self.device)
+        else:
+            device_obj = self.device
+        
+        tokens = tokens.to(device_obj)
         z = self.model.encode_text(tokens)
         if self.normalize:
             z = z / torch.linalg.norm(z, dim=1, keepdim=True)
