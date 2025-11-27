@@ -1,145 +1,145 @@
 {
-  "timestamp": "2025-11-27T14:22:27.330911",
+  "timestamp": "2025-11-27T15:19:53.182460",
   "summary": {
     "total": 19,
-    "passed": 17,
-    "failed": 2,
-    "success_rate": "89.5%",
-    "total_duration": "701.38s"
+    "passed": 19,
+    "failed": 0,
+    "success_rate": "100.0%",
+    "total_duration": "918.06s"
   },
   "results": [
     {
       "test_name": "Basic Generation",
       "success": true,
-      "duration": "34.63s",
+      "duration": "34.66s",
       "error": null,
-      "timestamp": "2025-11-27T14:11:18.643190"
+      "timestamp": "2025-11-27T15:05:07.976528"
     },
     {
       "test_name": "Sampler: ddim",
       "success": true,
-      "duration": "26.53s",
+      "duration": "24.95s",
       "error": null,
-      "timestamp": "2025-11-27T14:11:45.176968"
+      "timestamp": "2025-11-27T15:05:32.926612"
     },
     {
       "test_name": "Sampler: plms",
-      "success": false,
-      "duration": "19.62s",
-      "error": "/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/lightning_fabric/__init__.py:36: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n  __import__(\"pkg_resources\").declare_namespace(__name__)\nGlobal seed set to 42\n/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/tim",
-      "timestamp": "2025-11-27T14:12:04.798713"
+      "success": true,
+      "duration": "24.79s",
+      "error": null,
+      "timestamp": "2025-11-27T15:05:57.715999"
     },
     {
       "test_name": "Sampler: dpm_solver",
-      "success": false,
-      "duration": "20.47s",
-      "error": "/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/lightning_fabric/__init__.py:36: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n  __import__(\"pkg_resources\").declare_namespace(__name__)\nGlobal seed set to 42\n/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/tim",
-      "timestamp": "2025-11-27T14:12:25.268513"
+      "success": true,
+      "duration": "24.52s",
+      "error": null,
+      "timestamp": "2025-11-27T15:06:22.233250"
     },
     {
       "test_name": "CFG Scale: 1.0",
       "success": true,
-      "duration": "54.63s",
+      "duration": "18.57s",
       "error": null,
-      "timestamp": "2025-11-27T14:13:19.898273"
+      "timestamp": "2025-11-27T15:06:40.800920"
     },
     {
       "test_name": "CFG Scale: 3.0",
       "success": true,
-      "duration": "43.80s",
+      "duration": "58.13s",
       "error": null,
-      "timestamp": "2025-11-27T14:14:03.702225"
+      "timestamp": "2025-11-27T15:07:38.932534"
     },
     {
       "test_name": "CFG Scale: 7.5",
       "success": true,
-      "duration": "27.26s",
+      "duration": "22.14s",
       "error": null,
-      "timestamp": "2025-11-27T14:14:30.966436"
+      "timestamp": "2025-11-27T15:08:01.076781"
     },
     {
       "test_name": "CFG Scale: 10.0",
       "success": true,
-      "duration": "24.77s",
+      "duration": "240.52s",
       "error": null,
-      "timestamp": "2025-11-27T14:14:55.738033"
+      "timestamp": "2025-11-27T15:12:01.599581"
     },
     {
       "test_name": "Steps: 50",
       "success": true,
-      "duration": "26.59s",
+      "duration": "25.05s",
       "error": null,
-      "timestamp": "2025-11-27T14:15:22.324540"
+      "timestamp": "2025-11-27T15:12:26.648534"
     },
     {
       "test_name": "Steps: 100",
       "success": true,
-      "duration": "39.15s",
+      "duration": "37.13s",
       "error": null,
-      "timestamp": "2025-11-27T14:16:01.470546"
+      "timestamp": "2025-11-27T15:13:03.776138"
     },
     {
       "test_name": "Steps: 200",
       "success": true,
-      "duration": "65.82s",
+      "duration": "63.55s",
       "error": null,
-      "timestamp": "2025-11-27T14:17:07.294459"
+      "timestamp": "2025-11-27T15:14:07.325868"
     },
     {
       "test_name": "Mesh Resolution: 64",
       "success": true,
-      "duration": "25.95s",
+      "duration": "26.83s",
       "error": null,
-      "timestamp": "2025-11-27T14:17:33.248422"
+      "timestamp": "2025-11-27T15:14:34.159090"
     },
     {
       "test_name": "Mesh Resolution: 128",
       "success": true,
-      "duration": "37.41s",
+      "duration": "44.43s",
       "error": null,
-      "timestamp": "2025-11-27T14:18:10.658803"
+      "timestamp": "2025-11-27T15:15:18.589470"
     },
     {
       "test_name": "Mesh Resolution: 256",
       "success": true,
-      "duration": "85.16s",
+      "duration": "96.64s",
       "error": null,
-      "timestamp": "2025-11-27T14:19:35.816539"
+      "timestamp": "2025-11-27T15:16:55.233923"
     },
     {
       "test_name": "MPS Refinement",
       "success": true,
-      "duration": "95.44s",
+      "duration": "104.58s",
       "error": null,
-      "timestamp": "2025-11-27T14:21:12.389761"
+      "timestamp": "2025-11-27T15:18:40.839760"
     },
     {
       "test_name": "Edge Case: Very short prompt",
       "success": true,
-      "duration": "20.55s",
+      "duration": "20.53s",
       "error": null,
-      "timestamp": "2025-11-27T14:21:33.742178"
+      "timestamp": "2025-11-27T15:19:02.142143"
     },
     {
       "test_name": "Edge Case: Long prompt",
       "success": true,
-      "duration": "20.16s",
+      "duration": "18.60s",
       "error": null,
-      "timestamp": "2025-11-27T14:21:53.906052"
+      "timestamp": "2025-11-27T15:19:20.746961"
     },
     {
       "test_name": "Edge Case: Minimum steps",
       "success": true,
-      "duration": "15.14s",
+      "duration": "15.45s",
       "error": null,
-      "timestamp": "2025-11-27T14:22:09.042971"
+      "timestamp": "2025-11-27T15:19:36.192595"
     },
     {
       "test_name": "Edge Case: Low CFG scale",
       "success": true,
-      "duration": "18.29s",
+      "duration": "16.99s",
       "error": null,
-      "timestamp": "2025-11-27T14:22:27.330513"
+      "timestamp": "2025-11-27T15:19:53.181930"
     }
   ]
 }
