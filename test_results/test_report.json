@@ -1,0 +1,145 @@
+{
+  "timestamp": "2025-11-27T14:22:27.330911",
+  "summary": {
+    "total": 19,
+    "passed": 17,
+    "failed": 2,
+    "success_rate": "89.5%",
+    "total_duration": "701.38s"
+  },
+  "results": [
+    {
+      "test_name": "Basic Generation",
+      "success": true,
+      "duration": "34.63s",
+      "error": null,
+      "timestamp": "2025-11-27T14:11:18.643190"
+    },
+    {
+      "test_name": "Sampler: ddim",
+      "success": true,
+      "duration": "26.53s",
+      "error": null,
+      "timestamp": "2025-11-27T14:11:45.176968"
+    },
+    {
+      "test_name": "Sampler: plms",
+      "success": false,
+      "duration": "19.62s",
+      "error": "/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/lightning_fabric/__init__.py:36: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n  __import__(\"pkg_resources\").declare_namespace(__name__)\nGlobal seed set to 42\n/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/tim",
+      "timestamp": "2025-11-27T14:12:04.798713"
+    },
+    {
+      "test_name": "Sampler: dpm_solver",
+      "success": false,
+      "duration": "20.47s",
+      "error": "/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/lightning_fabric/__init__.py:36: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n  __import__(\"pkg_resources\").declare_namespace(__name__)\nGlobal seed set to 42\n/Users/caraveo/miniconda3/envs/hephaestus/lib/python3.10/site-packages/tim",
+      "timestamp": "2025-11-27T14:12:25.268513"
+    },
+    {
+      "test_name": "CFG Scale: 1.0",
+      "success": true,
+      "duration": "54.63s",
+      "error": null,
+      "timestamp": "2025-11-27T14:13:19.898273"
+    },
+    {
+      "test_name": "CFG Scale: 3.0",
+      "success": true,
+      "duration": "43.80s",
+      "error": null,
+      "timestamp": "2025-11-27T14:14:03.702225"
+    },
+    {
+      "test_name": "CFG Scale: 7.5",
+      "success": true,
+      "duration": "27.26s",
+      "error": null,
+      "timestamp": "2025-11-27T14:14:30.966436"
+    },
+    {
+      "test_name": "CFG Scale: 10.0",
+      "success": true,
+      "duration": "24.77s",
+      "error": null,
+      "timestamp": "2025-11-27T14:14:55.738033"
+    },
+    {
+      "test_name": "Steps: 50",
+      "success": true,
+      "duration": "26.59s",
+      "error": null,
+      "timestamp": "2025-11-27T14:15:22.324540"
+    },
+    {
+      "test_name": "Steps: 100",
+      "success": true,
+      "duration": "39.15s",
+      "error": null,
+      "timestamp": "2025-11-27T14:16:01.470546"
+    },
+    {
+      "test_name": "Steps: 200",
+      "success": true,
+      "duration": "65.82s",
+      "error": null,
+      "timestamp": "2025-11-27T14:17:07.294459"
+    },
+    {
+      "test_name": "Mesh Resolution: 64",
+      "success": true,
+      "duration": "25.95s",
+      "error": null,
+      "timestamp": "2025-11-27T14:17:33.248422"
+    },
+    {
+      "test_name": "Mesh Resolution: 128",
+      "success": true,
+      "duration": "37.41s",
+      "error": null,
+      "timestamp": "2025-11-27T14:18:10.658803"
+    },
+    {
+      "test_name": "Mesh Resolution: 256",
+      "success": true,
+      "duration": "85.16s",
+      "error": null,
+      "timestamp": "2025-11-27T14:19:35.816539"
+    },
+    {
+      "test_name": "MPS Refinement",
+      "success": true,
+      "duration": "95.44s",
+      "error": null,
+      "timestamp": "2025-11-27T14:21:12.389761"
+    },
+    {
+      "test_name": "Edge Case: Very short prompt",
+      "success": true,
+      "duration": "20.55s",
+      "error": null,
+      "timestamp": "2025-11-27T14:21:33.742178"
+    },
+    {
+      "test_name": "Edge Case: Long prompt",
+      "success": true,
+      "duration": "20.16s",
+      "error": null,
+      "timestamp": "2025-11-27T14:21:53.906052"
+    },
+    {
+      "test_name": "Edge Case: Minimum steps",
+      "success": true,
+      "duration": "15.14s",
+      "error": null,
+      "timestamp": "2025-11-27T14:22:09.042971"
+    },
+    {
+      "test_name": "Edge Case: Low CFG scale",
+      "success": true,
+      "duration": "18.29s",
+      "error": null,
+      "timestamp": "2025-11-27T14:22:27.330513"
+    }
+  ]
+}
