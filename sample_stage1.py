@@ -22,7 +22,8 @@ from utility.initialize import instantiate_from_config, get_obj_from_str
 from utility.triplane_renderer.eg3d_renderer import sample_from_planes, generate_planes
 from utility.triplane_renderer.renderer import get_rays, to8b
 from utility.device_utils import get_device, get_dtype, empty_cache, to_device
-from utility.refinement import refine_mesh_automatic, refine_with_threefiner, check_threefiner_available, check_cuda_available
+from utility.refinement import refine_mesh_automatic, refine_with_threefiner, check_threefiner_available, check_cuda_available, check_mps_available
+from utility.refinement_mps import refine_mesh_mps
 from safetensors.torch import load_file
 from huggingface_hub import hf_hub_download
 
@@ -322,15 +323,17 @@ def main():
                         trimesh.exchange.export.export_mesh(mesh, ply_path, file_type='ply')
                         print(f"✓ Generated mesh: {ply_path}")
                         
-                        # Automatic refinement with threefiner if requested
+                        # Automatic refinement if requested
                         if args.refine and not args.no_refine:
                             print(f"\n{'='*60}")
-                            print(f"🔨 Starting automatic refinement with threefiner...")
+                            print(f"🔨 Starting automatic refinement...")
                             print(f"{'='*60}")
                             
-                            # Check if refinement is available
+                            refined_path = None
+                            
+                            # Try threefiner first (CUDA only)
                             if check_threefiner_available() and check_cuda_available():
-                                # Create stage2 directory if it doesn't exist
+                                print("Using threefiner for refinement (CUDA)...")
                                 stage2_dir = os.path.join(os.path.dirname(log_dir), 'stage2')
                                 os.makedirs(stage2_dir, exist_ok=True)
                                 
@@ -345,22 +348,43 @@ def main():
                                     text_dir=True,
                                     verbose=True
                                 )
+                            
+                            # Fallback to MPS-compatible refinement (Mac)
+                            elif check_mps_available() or get_device(prefer_mps=True).type == 'mps':
+                                print("Using MPS-compatible refinement (Mac)...")
+                                stage2_dir = os.path.join(os.path.dirname(log_dir), 'stage2')
+                                os.makedirs(stage2_dir, exist_ok=True)
                                 
-                                if refined_path:
-                                    print(f"\n{'='*60}")
-                                    print(f"✓ Flawless refinement complete!")
-                                    print(f"  Original: {ply_path}")
-                                    print(f"  Refined:  {refined_path}")
-                                    print(f"{'='*60}\n")
-                                else:
-                                    print(f"⚠ Refinement failed, but original mesh is available: {ply_path}")
+                                # Use refinement steps as iterations equivalent
+                                refinement_steps = max(200, args.refine_iters // 5)  # Convert iters to steps
+                                mcubes_res = 256 if args.refine_iters >= 1000 else 128
+                                
+                                refined_path = refine_mesh_mps(
+                                    model=model,
+                                    mesh_path=ply_path,
+                                    prompt=text_i,
+                                    refinement_steps=refinement_steps,
+                                    mcubes_res=mcubes_res,
+                                    cfg_scale=args.cfg_scale,
+                                    sampler=args.sampler,
+                                    outdir=stage2_dir,
+                                    save_name=f"{text_connect}_{s}_{b}_refined",
+                                    verbose=True
+                                )
+                            
+                            if refined_path:
+                                print(f"\n{'='*60}")
+                                print(f"✓ Flawless refinement complete!")
+                                print(f"  Original: {ply_path}")
+                                print(f"  Refined:  {refined_path}")
+                                print(f"{'='*60}\n")
                             else:
-                                print("⚠ Refinement skipped:")
-                                if not check_threefiner_available():
-                                    print("  - threefiner CLI not found. Install with: pip install threefiner")
-                                if not check_cuda_available():
-                                    print("  - CUDA not available. threefiner requires CUDA (Linux/Windows with NVIDIA GPU)")
+                                print(f"⚠ Refinement not available or failed.")
                                 print(f"  Original mesh saved: {ply_path}")
+                                if not check_threefiner_available() and not check_mps_available():
+                                    print("  - Neither threefiner (CUDA) nor MPS refinement available")
+                                elif check_mps_available():
+                                    print("  - MPS refinement attempted but failed")
 
                     if not args.no_video:
                         view_num = len(batch_rays_list)

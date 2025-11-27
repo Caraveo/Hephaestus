@@ -48,6 +48,14 @@ def check_cuda_available():
     except ImportError:
         return False
 
+def check_mps_available():
+    """Check if MPS is available (for Mac refinement)."""
+    try:
+        import torch
+        return hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()
+    except:
+        return False
+
 def refine_with_threefiner(
     mesh_path,
     prompt,
