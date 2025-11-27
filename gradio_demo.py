@@ -1,4 +1,7 @@
 import os
+# Fix OpenMP conflict on Mac
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 import cv2
 import time
 import tyro

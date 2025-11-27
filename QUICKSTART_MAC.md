@@ -37,8 +37,16 @@ Note: The gradio demo requires `threefiner` for stage 2 refinement. Install sepa
 
 ## Troubleshooting
 
+- **OpenMP Error?** If you see "Error #15: Initializing libomp.dylib", the scripts now handle this automatically. If it persists, run:
+  ```bash
+  export KMP_DUPLICATE_LIB_OK=TRUE
+  ```
+  Or use: `source activate_hephaestus.sh`
+
 - **MPS not available?** Update PyTorch: `pip install torch --upgrade`
+
 - **Out of memory?** Use lower resolution: `--mcubes_res 64 --render_res 64`
+
 - **Import errors?** Make sure you're in the conda environment: `conda activate hephaestus`
 
 ## Performance Tips

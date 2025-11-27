@@ -71,9 +71,17 @@ The demo will automatically:
 
 ### Troubleshooting
 
-1. **MPS not available**: Update PyTorch to latest version (>=2.0.0)
-2. **Out of memory**: Reduce `--mcubes_res` and `--render_res` parameters
-3. **Import errors**: Ensure all dependencies are installed: `pip install -r requirements.txt` (if exists)
+1. **OpenMP Error**: If you see "Error #15: Initializing libomp.dylib", this is a common Mac issue. The scripts automatically set `KMP_DUPLICATE_LIB_OK=TRUE` to work around this. If you still see the error, run:
+   ```bash
+   export KMP_DUPLICATE_LIB_OK=TRUE
+   ```
+   Or use the activation script: `source activate_hephaestus.sh`
+
+2. **MPS not available**: Update PyTorch to latest version (>=2.0.0)
+
+3. **Out of memory**: Reduce `--mcubes_res` and `--render_res` parameters
+
+4. **Import errors**: Ensure all dependencies are installed from the environment file
 
 ## Configuration
 

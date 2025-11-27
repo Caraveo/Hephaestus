@@ -1,7 +1,7 @@
 name: hephaestus
 channels:
-  - pytorch
   - conda-forge
+  - pytorch
   - defaults
 dependencies:
   - python=3.10
@@ -11,6 +11,7 @@ dependencies:
   - pyyaml>=6.0
   - tqdm
   - scipy
+  - openmp  # Ensure consistent OpenMP from conda-forge
   - pip:
       - torch>=2.0.0
       - torchvision>=0.15.0

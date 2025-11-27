@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 """Test script to verify MPS support and float16 compatibility."""
+import os
+# Fix OpenMP conflict on Mac
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
+
 import torch
 import sys
 from utility.device_utils import get_device, get_dtype
