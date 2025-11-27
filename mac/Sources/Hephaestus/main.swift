@@ -131,7 +131,7 @@ struct PromptSection: View {
             VStack(alignment: .leading, spacing: 12) {
                 TextField("e.g., a majestic dragon statue", text: $generator.prompt, axis: .vertical)
                     .textFieldStyle(.roundedBorder)
-                    .lineLimit(3...6)
+                    .lineLimit(3, reservesSpace: false)
                 
                 InfoRow(
                     title: "Description",
