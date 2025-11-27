@@ -9,10 +9,16 @@ import SwiftUI
 
 @main
 struct HephaestusApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .frame(minWidth: 1000, minHeight: 700)
+                .onAppear {
+                    // Bring app to front when it launches
+                    NSApplication.shared.activate(ignoringOtherApps: true)
+                }
         }
         .windowStyle(.hiddenTitleBar)
         .windowToolbarStyle(.unified)
@@ -22,10 +28,31 @@ struct HephaestusApp: App {
     }
     
     init() {
-        // Set app icon if possible
-        if let iconPath = Bundle.main.path(forResource: "Hephaestus", ofType: "png") {
-            // Icon will be set via Assets.xcassets in Xcode project
+        // Activate app on launch
+        NSApplication.shared.setActivationPolicy(.regular)
+    }
+}
+
+// App delegate to handle activation
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Bring app to front
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        
+        // Focus the main window
+        if let window = NSApplication.shared.windows.first {
+            window.makeKeyAndOrderFront(nil)
+            window.center()
         }
+    }
+    
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            for window in sender.windows {
+                window.makeKeyAndOrderFront(nil)
+            }
+        }
+        return true
     }
 }
 
