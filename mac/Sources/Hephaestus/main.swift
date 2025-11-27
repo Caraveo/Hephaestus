@@ -733,7 +733,7 @@ class ModelGenerator: ObservableObject {
                             self.progress = 0.8
                         } else if string.contains("Generated mesh:") || string.contains("Refined mesh:") {
                             // Extract file path
-                            if let filePath = extractFilePath(from: string) {
+                            if let filePath = self.extractFilePath(from: string) {
                                 self.outputFiles.append(filePath)
                             }
                         }
