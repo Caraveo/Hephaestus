@@ -9,6 +9,8 @@ import mcubes
 import trimesh
 import argparse
 import numpy as np
+import random
+import re
 from tqdm import tqdm
 import imageio.v2 as imageio
 import pytorch_lightning as pl
@@ -30,6 +32,41 @@ from huggingface_hub import hf_hub_download
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+def generate_short_filename(text, suffix=""):
+    """
+    Generate a short filename from text prompt using first 3 words + random number.
+    
+    Args:
+        text: The text prompt
+        suffix: Optional suffix to append
+    
+    Returns:
+        Short filename string (max ~50 chars)
+    """
+    # Split text into words and take first 3
+    words = text.split()
+    if len(words) >= 3:
+        short_text = ' '.join(words[:3])
+    else:
+        short_text = text
+    
+    # Sanitize: remove special characters, keep only alphanumeric and spaces
+    short_text = re.sub(r'[^a-zA-Z0-9\s]', '', short_text)
+    # Replace spaces with underscores
+    short_text = '_'.join(short_text.split())
+    # Limit length to 30 chars to leave room for random number
+    short_text = short_text[:30]
+    
+    # Add random number (4 digits)
+    random_num = random.randint(1000, 9999)
+    
+    # Combine
+    filename = f"{short_text}_{random_num}"
+    if suffix:
+        filename = f"{filename}_{suffix}"
+    
+    return filename
 
 def add_text(rgb, caption):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -196,6 +233,8 @@ def main():
 
     for text_idx, text_i in enumerate(text):
         text_connect = '_'.join(text_i.split(' '))
+        # Generate short filename for file paths (first 3 words + random number)
+        file_basename = generate_short_filename(text_i)
         for s in range(args.samples):
             batch_size = args.batch_size
             with torch.no_grad():
@@ -317,7 +356,7 @@ def main():
 
                         # export to ply
                         mesh = trimesh.Trimesh(vertices, triangles, vertex_colors=(rgb_final * 255).astype(np.uint8))
-                        ply_path = os.path.join(log_dir, f"{text_connect}_{s}_{b}.ply")
+                        ply_path = os.path.join(log_dir, f"{file_basename}_{s}_{b}.ply")
                         trimesh.exchange.export.export_mesh(mesh, ply_path, file_type='ply')
                         print(f"✓ Generated mesh: {ply_path}")
                         
@@ -340,7 +379,7 @@ def main():
                                     prompt=text_i,
                                     refinement_mode=args.refine_mode,
                                     outdir=stage2_dir,
-                                    save_name=f"{text_connect}_{s}_{b}_refined",
+                                    save_name=f"{file_basename}_{s}_{b}_refined",
                                     iters=args.refine_iters,
                                     front_dir='-y',
                                     text_dir=True,
@@ -366,7 +405,7 @@ def main():
                                     cfg_scale=args.cfg_scale,
                                     sampler=args.sampler,
                                     outdir=stage2_dir,
-                                    save_name=f"{text_connect}_{s}_{b}_refined",
+                                    save_name=f"{file_basename}_{s}_{b}_refined",
                                     verbose=True
                                 )
                             
@@ -390,10 +429,10 @@ def main():
                         for v in tqdm(range(view_num//4, view_num//4 * 3, 2)):
                             rgb_sample = render_img(v)
                             video_list.append(rgb_sample)
-                        imageio.mimwrite(os.path.join(log_dir, "{}_{}_{}.mp4".format(text_connect, s, b)), np.stack(video_list, 0))
+                        imageio.mimwrite(os.path.join(log_dir, "{}_{}_{}.mp4".format(file_basename, s, b)), np.stack(video_list, 0))
                     else:
                         rgb_sample = render_img(104)
-                        imageio.imwrite(os.path.join(log_dir, "{}_{}_{}.jpg".format(text_connect, s, b)), rgb_sample)
+                        imageio.imwrite(os.path.join(log_dir, "{}_{}_{}.jpg".format(file_basename, s, b)), rgb_sample)
 
 if __name__ == '__main__':
     main()
