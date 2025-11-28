@@ -4,6 +4,8 @@ import torch
 import numpy as np
 import trimesh
 import mcubes
+import re
+import random
 from pathlib import Path
 from tqdm import tqdm
 
@@ -169,7 +171,18 @@ def extract_mesh_high_res(
     os.makedirs(outdir, exist_ok=True)
     
     if save_name is None:
-        save_name = prompt.replace(' ', '_') + '_refined'
+        # Generate short filename from prompt (first 3 words + random number)
+        words = prompt.split()
+        if len(words) >= 3:
+            short_text = ' '.join(words[:3])
+        else:
+            short_text = prompt
+        # Sanitize and limit length
+        short_text = re.sub(r'[^a-zA-Z0-9\s]', '', short_text)
+        short_text = '_'.join(short_text.split())
+        short_text = short_text[:30]  # Limit to 30 chars
+        random_num = random.randint(1000, 9999)
+        save_name = f"{short_text}_{random_num}_refined"
     
     ply_path = os.path.join(outdir, f"{save_name}.ply")
     
